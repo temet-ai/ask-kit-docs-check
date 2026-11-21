@@ -1,0 +1,55 @@
+id = "temet.docs-check"
+name = "docs-check"
+version = "0.1.0"
+min_ask_kit = "0.2.0"
+requires = ["git", "rg"]
+says = "whether a repository's documentation still matches its code: which statements in README, docs/ and AGENTS.md name a path, file, command, flag, environment variable, script, function or version that no longer exists, which docs were last changed before the code they describe, which commands, flags, scripts and environment variables the code has that no doc names, broken relative links and anchors, where a name is still mentioned in the docs after a rename, a README install or usage line the package no longer provides; and bringing the docs up to date (edit the docs to match the code, add the missing entry, fix links, retire a doc)"
+keywords = ["docs? (up to date|out of date|stale|drift)", "stale docs?", "outdated docs?", "documentation", "README", "docs/", "broken links?", "dead links?", "undocumented", "update the docs", "does the guide", "still (say|mention|refer)", "timebombs?", "doc drift"]
+route_hint = "whether a repository's Markdown docs (README, docs/, guides, AGENTS.md command lists) still match its code, and editing them to match, are docs-check; how Claude Code itself works is claude-code-docs; what the code does or where something is defined is code; reviewing or rewriting prose for style is writing; rules and CLAUDE.md as instructions to Claude (duplicates, contradictions, consolidating) are rules; git history questions are git; what a past session did is sessions or mike"
+cite = "`path:line` of the doc line, and the file or commit that shows what the code has now"
+instructions = "instructions.md"
+state_key = "${REPO_ROOT}"
+acts = [
+  "docs.edit",
+  "docs.insert",
+  "docs.create",
+  "docs.remove",
+  "repo.edit",
+  "repo.write",
+  "repo.run",
+]
+
+[[settings]]
+key = "REPO_ROOT"
+about = "the repository whose documentation to check; found from the folder the agent works in"
+detect = ["git", "rev-parse", "--show-toplevel"]
+
+[[sources]]
+kind = "module"
+name = "docs"
+module = "docs.mjs"
+api = "api.d.ts"
+
+[[sources]]
+kind = "folder"
+name = "repo"
+path = "${REPO_ROOT}"
+about = "the repository: its code, its documentation and its git history"
+# What the investigator reads goes to a model: credentials, keys and build output are never searched or read.
+exclude = [
+  ".env", ".env.*", "*.pem", "*.key", "*.p12", "*.pfx", "id_rsa*", "id_ed25519*", "*credential*", "*secret*", "*token*", "*cookie*", "*.npmrc", ".netrc", "auth.json",
+  "node_modules/**", "target/**", "dist/**", "build/**", "out/**", "coverage/**", ".git/**", ".venv/**", "venv/**", "__pycache__/**",
+  "package-lock.json", "pnpm-lock.yaml", "yarn.lock", "bun.lock", "bun.lockb", "Cargo.lock", "*.min.js", "*.map",
+]
+
+[[roles]]
+name = "checker"
+when = "a question about whether the documentation is current or correct: what in the docs is stale, which docs are behind the code, what the code has that no doc mentions, broken links, whether a name is still in the docs"
+patterns = ["\\b(docs?|documentation|readme|guide|agents\\.md)\\b.*\\b(up to date|out of date|stale|current|still (say|mention|refer|true)|wrong|match|drift|accurate)\\b", "\\b(undocumented|broken links?|dead links?)\\b"]
+instructions = "roles/checker.md"
+
+[[roles]]
+name = "updater"
+when = "a request to update, fix or write documentation for a change or a finding: change the docs to match the code, document a new command or setting, fix a README's install and usage lines, fix links, retire a doc"
+patterns = ["\\b(update|fix|bring|document|add|retire|remove)\\b.*\\b(docs?|documentation|readme|guide|agents\\.md)\\b"]
+instructions = "roles/updater.md"

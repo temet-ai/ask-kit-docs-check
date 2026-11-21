@@ -1,0 +1,13 @@
+{
+  "about": "The kinds of question agents answer by hand with rg, grep, sed and wc about documentation: is this documentation still true or does it hold timebombs, are the docs still using an old name after a rename, what is left after a cut, which docs fell behind the code, which flags or settings no doc mentions, does the README name things that are gone. Each is put to a small repository that bench/make-fixture.sh builds in bench/fixtures/ankh (run it once before the bench; its dates, names and messages are fixed, so the answers do not change). The repository is named by path relative to the kit folder, because the kit otherwise answers about the repository the agent works in.",
+  "questions": [
+    { "id": "stale-names", "q": "In bench/fixtures/ankh, which environment variables or constants named in the docs does the code not have? Give the file and line of each.", "expect": ["ANKH_GUILD", "README\\.md"] },
+    { "id": "rename-sweep", "q": "In bench/fixtures/ankh the TOLL_DENIED list is gone from the code. Which commit removed it, and which docs still name it?", "expect": ["Remove the TOLL_DENIED list|2fc6696", "guide\\.md"] },
+    { "id": "doc-behind-code", "q": "In bench/fixtures/ankh, which docs were last changed before the code they describe, and how many commits have they missed?", "expect": ["README", "guide", "\\b2\\b"] },
+    { "id": "links-clean", "q": "Does any document in bench/fixtures/ankh have a broken relative link or a link to a heading that is not there?", "expect": ["setup\\.md", "limits"] },
+    { "id": "undocumented-flags", "q": "Which command-line flags does the ankh tool in bench/fixtures/ankh define that no doc mentions?", "expect": ["--rota"] },
+    { "id": "readme-current", "q": "In bench/fixtures/ankh, does the README name any command, file, script or setting that the code no longer has?", "expect": ["ANKH_GUILD"] },
+    { "id": "links-shot", "do": "links", "params": { "repo": "bench/fixtures/ankh" }, "expect": ["setup\\.md", "file missing", "anchor missing"] },
+    { "id": "undocumented-shot", "do": "undocumented", "params": { "repo": "bench/fixtures/ankh", "kind": "flag" }, "expect": ["--rota", "src/cli\\.mjs"] }
+  ]
+}
